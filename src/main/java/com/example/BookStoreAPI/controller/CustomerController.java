@@ -1,5 +1,6 @@
 package com.example.BookStoreAPI.controller;
 
+import com.example.BookStoreAPI.dto.CustomerDTO;
 import com.example.BookStoreAPI.model.Customer;
 import com.example.BookStoreAPI.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,8 @@ public class CustomerController {
     private CustomerService customerService;
 
     @PostMapping
-    public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
-        Customer savedCustomer = customerService.createCustomer(customer);
+    public ResponseEntity<CustomerDTO> createCustomer(@RequestBody CustomerDTO customer) {
+        CustomerDTO savedCustomer = customerService.createCustomer(customer);
         return ResponseEntity.ok(savedCustomer);
     }
 

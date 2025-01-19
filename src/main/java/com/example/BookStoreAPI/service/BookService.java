@@ -1,10 +1,13 @@
 package com.example.BookStoreAPI.service;
 
+import com.example.BookStoreAPI.dto.BookDTO;
 import com.example.BookStoreAPI.model.Book;
 import com.example.BookStoreAPI.repository.BookRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,26 +17,35 @@ public class BookService {
     @Autowired
     private BookRepository bookRepository;
 
-    public List<Book> getAllBooks() {
-        return bookRepository.findAll();
+    @Autowired
+    private ModelMapper modelMapper;
+
+    public List<BookDTO> getAllBooks() {
+        return bookRepository.findAll()
+                .stream()
+                .map(book -> modelMapper.map(book, BookDTO.class))
+                .toList();
     }
 
-    public Optional<Book> getBookById(Long id) {
-        return bookRepository.findById(id);
+    public Optional<BookDTO> getBookById(Long id) {
+        return bookRepository.findById(id)
+                .map(book -> modelMapper.map(book, BookDTO.class));
     }
 
-    public Book createBook(Book book) {
-        return bookRepository.save(book);
+    public BookDTO createBook(BookDTO book) {
+        Book savedBook = bookRepository.save(modelMapper.map(book, Book.class));
+        return modelMapper.map(savedBook, BookDTO.class);
     }
 
-    public Optional<Book> updateBook(Long id, Book updatedBook) {
+    public Optional<BookDTO> updateBook(Long id, BookDTO updatedBook) {
         return bookRepository.findById(id)
                 .map(book -> {
                     book.setTitle(updatedBook.getTitle());
                     book.setAuthor(updatedBook.getAuthor());
                     book.setPrice(updatedBook.getPrice());
                     book.setIsbn(updatedBook.getIsbn());
-                    return bookRepository.save(book);
+                    bookRepository.save(book);
+                    return modelMapper.map(book, BookDTO.class);
                 });
     }
 
@@ -45,15 +57,20 @@ public class BookService {
         return false;
     }
 
-    public List<Book> getFilteredBooks(String title, String author) {
+    public List<BookDTO> getFilteredBooks(String title, String author) {
+        List<Book> result;
         if (title != null && author != null) {
-            return bookRepository.findByTitleContainingAndAuthorContaining(title, author);
+            result = bookRepository.findByTitleContainingAndAuthorContaining(title, author);
         } else if (title != null) {
-            return bookRepository.findByTitleContaining(title);
+            result = bookRepository.findByTitleContaining(title);
         } else if (author != null) {
-            return bookRepository.findByAuthorContaining(author);
+            result = bookRepository.findByAuthorContaining(author);
         } else {
-            return bookRepository.findAll();
+            result = bookRepository.findAll();
         }
+
+        return result.stream()
+                .map(book -> modelMapper.map(book, BookDTO.class))
+                .toList();
     }
 }

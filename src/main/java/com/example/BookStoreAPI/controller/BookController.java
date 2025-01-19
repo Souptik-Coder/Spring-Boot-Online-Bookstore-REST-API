@@ -1,5 +1,6 @@
 package com.example.BookStoreAPI.controller;
 
+import com.example.BookStoreAPI.dto.BookDTO;
 import com.example.BookStoreAPI.model.Book;
 import com.example.BookStoreAPI.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,8 +21,8 @@ public class BookController {
 
     @GetMapping
     @Operation(summary = "Get all Books")
-    public ResponseEntity<List<Book>> getAllBooks() {
-        List<Book> books = bookService.getAllBooks();
+    public ResponseEntity<List<BookDTO>> getAllBooks() {
+        List<BookDTO> books = bookService.getAllBooks();
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(books.size()));
         return new ResponseEntity<>(books, headers, HttpStatus.OK);
@@ -29,16 +30,16 @@ public class BookController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get Book by Id")
-    public ResponseEntity<Book> getBookById(@PathVariable Long id) {
-        Optional<Book> book = bookService.getBookById(id);
+    public ResponseEntity<BookDTO> getBookById(@PathVariable Long id) {
+        Optional<BookDTO> book = bookService.getBookById(id);
         return book.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create Book")
-    public ResponseEntity<Book> createBook(@RequestBody Book book) {
-        Book createdBook = bookService.createBook(book);
+    public ResponseEntity<BookDTO> createBook(@RequestBody BookDTO book) {
+        BookDTO createdBook = bookService.createBook(book);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Location", "/books/" + createdBook.getId());
         return new ResponseEntity<>(createdBook, headers, HttpStatus.CREATED);
@@ -46,7 +47,7 @@ public class BookController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update Book")
-    public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody Book updatedBook) {
+    public ResponseEntity<BookDTO> updateBook(@PathVariable Long id, @RequestBody BookDTO updatedBook) {
         return bookService.updateBook(id, updatedBook)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -65,8 +66,8 @@ public class BookController {
 
     @GetMapping("/filter")
     @Operation(summary = "Get filtered Books")
-    public List<Book> getBooks(@RequestParam(required = false) String title,
-                               @RequestParam(required = false) String author) {
+    public List<BookDTO> getBooks(@RequestParam(required = false) String title,
+                                  @RequestParam(required = false) String author) {
         return bookService.getFilteredBooks(title, author);
     }
 }
